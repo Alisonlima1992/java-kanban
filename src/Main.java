@@ -4,7 +4,3 @@ public class Main {
 
     }
 }
-
-
-
-
