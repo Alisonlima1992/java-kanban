@@ -21,7 +21,7 @@ public class Main {
         System.out.println(manager.getAllSubtasks());
 
         manager.deleteAllEpics();
-        System.out.println("\nПосле удаления всех эпиков:");
+        System.out.println("После удаления всех эпиков:");
         System.out.println(manager.getAllEpics());
 
     }
