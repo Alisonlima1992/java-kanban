@@ -1,4 +1,3 @@
-package com.practicum;
 import com.practicum.service.Status;
 import com.practicum.service.TaskManager;
 import com.practicum.model.Task;
