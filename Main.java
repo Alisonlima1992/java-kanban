@@ -1,8 +1,3 @@
-import com.practicum.service.Status;
-import com.practicum.service.TaskManager;
-import com.practicum.model.Task;
-import com.practicum.model.Epic;
-import com.practicum.model.Subtask;
 
 public class Main {
     public static void main(String[] args) {
@@ -10,3 +5,4 @@ public class Main {
     }
 }
 
+/*если пробую заливать в файлах то выдает ошибку ls: cannot access '../app/src/': No such file or directory Проверочная система не видит файлы в папке src. Проверьте их наличие.*/
