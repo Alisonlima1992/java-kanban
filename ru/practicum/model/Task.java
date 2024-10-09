@@ -1,5 +1,5 @@
-package ru.practicum.taskList;
-
+package ru.practicum.model;
+import ru.practicum.service.Status;
 public class Task {
     private final int id;
     private final String title;
