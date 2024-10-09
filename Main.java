@@ -5,4 +5,4 @@ public class Main {
     }
 }
 
-/*если пробую заливать в файлах то выдает ошибку ls: cannot access '../app/src/': No such file or directory Проверочная система не видит файлы в папке src. Проверьте их наличие.*/
+/*если пробую пушить в папках то выдает ошибку ls: cannot access '../app/src/': No such file or directory Проверочная система не видит файлы в папке src. Проверьте их наличие.*/
