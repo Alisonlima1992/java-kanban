@@ -1,8 +1,8 @@
-package ru.practicum.service;
+package com.practicum.service;
 
-import ru.practicum.model.Task;
-import ru.practicum.model.Epic;
-import ru.practicum.model.Subtask;
+import com.practicum.model.Task;
+import com.practicum.model.Epic;
+import com.practicum.model.Subtask;
 import java.util.HashMap;
 import java.util.ArrayList;
 

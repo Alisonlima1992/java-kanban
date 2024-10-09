@@ -1,4 +1,4 @@
-package ru.practicum.service;
+package com.practicum.service;
 
 public enum Status{
     NEW,

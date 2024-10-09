@@ -1,5 +1,5 @@
-package ru.practicum.model;
-import ru.practicum.service.Status;
+package com.practicum.model;
+import com.practicum.service.Status;
 import java.util.ArrayList;
 
 public class Epic extends Task{
