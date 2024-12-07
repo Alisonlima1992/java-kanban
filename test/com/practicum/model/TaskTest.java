@@ -8,6 +8,7 @@ import com.practicum.model.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
+
 public class TaskTest {
     @Test
     public void testTasksAreEqualIfIdsAreEqual() {

@@ -7,6 +7,7 @@ import com.practicum.service.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+
 public class InMemoryTaskManagerTest {
 
     private TaskManager taskManager = new InMemoryTaskManager();

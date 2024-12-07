@@ -2,6 +2,7 @@ package com.practicum.model;
 
 import com.practicum.service.Status;
 
+
 public class Task {
     private final int id;
     private final String title;
