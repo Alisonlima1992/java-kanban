@@ -57,5 +57,4 @@ public class InMemoryTaskManagerTest {
         assertEquals("Updated Description", task.getDescription());
         assertEquals(1, taskManager.getHistory().size());
     }
-
 }
