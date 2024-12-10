@@ -1,4 +1,4 @@
-package test;
+package test.com.practicum.model;
 
 import com.practicum.model.Subtask;
 import com.practicum.service.Status;

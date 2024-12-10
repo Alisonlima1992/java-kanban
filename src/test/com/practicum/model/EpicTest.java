@@ -1,4 +1,4 @@
-package test;
+package test.com.practicum.model;
 
 import org.junit.Test;
 import com.practicum.service.*;
