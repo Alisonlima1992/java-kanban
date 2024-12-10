@@ -13,7 +13,7 @@ public class InMemoryTaskManager implements TaskManager {
     private final HashMap<Integer, Epic> epics = new HashMap<>();
     private final HashMap<Integer, Subtask> subtasks = new HashMap<>();
 
-    private final InMemoryHistoryManager historyManager = new InMemoryHistoryManager();
+    private final ArrayList<Task> history = new ArrayList<>();
 
     private int idCounter = 1;
 
@@ -56,20 +56,12 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Task getTaskById(int id) {
-        Task task = tasks.get(id);
-        if (task != null) {
-            historyManager.add(task);
-        }
-        return task;
+        return tasks.get(id);
     }
 
     @Override
     public Subtask getSubtaskById(int id) {
-        Subtask subtask = subtasks.get(id);
-        if (subtask != null) {
-            historyManager.add(subtask);
-        }
-        return subtask;
+        return subtasks.get(id);
     }
 
     @Override
@@ -94,12 +86,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     public void deleteTask(int id) {
-
-        Task task = tasks.remove(id);
-        if (task != null) {
-            historyManager.remove(id);
-        }
-
+        tasks.remove(id);
     }
 
     public void deleteSubtask(int id) {
@@ -111,7 +98,6 @@ public class InMemoryTaskManager implements TaskManager {
                 updateEpicStatus(epic);
             }
             subtasks.remove(id);
-            historyManager.remove(id);
         }
     }
 
@@ -122,7 +108,6 @@ public class InMemoryTaskManager implements TaskManager {
                 deleteSubtask(subtask.getId());
             }
             updateEpicStatus(epic);
-            historyManager.remove(id);
         }
     }
 
@@ -158,7 +143,15 @@ public class InMemoryTaskManager implements TaskManager {
 
 
     public ArrayList<Task> getHistory() {
-        return historyManager.getHistory();
+        return history;
     }
+
+    private void addToHistory(Task task) {
+        if (history.size() >= 10) {
+            history.remove(0);
+        }
+        history.add(task);
+    }
+
 }
 
