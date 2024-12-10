@@ -1,4 +1,4 @@
-package test.com.practicum.service;
+package test;
 
 import com.practicum.model.Task;
 import com.practicum.service.*;
