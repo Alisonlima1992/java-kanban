@@ -6,6 +6,7 @@ import com.practicum.model.Task;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+
 public class InMemoryHistoryManager implements HistoryManager {
 
     private Node head;
