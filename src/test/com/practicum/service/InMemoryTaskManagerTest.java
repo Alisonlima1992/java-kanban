@@ -1,7 +1,6 @@
 package test.com.practicum.service;
 
 import org.junit.Test;
-import org.junit.jupiter.api.BeforeEach;
 import com.practicum.model.*;
 import com.practicum.service.*;
 
@@ -10,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.*;
 public class InMemoryTaskManagerTest {
 
     private TaskManager taskManager = new InMemoryTaskManager();
-
 
     @Test
     public void testAddTasksAndFindById() {
