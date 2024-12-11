@@ -30,6 +30,7 @@ public class EpicTest {
 
         assertEquals(epic1, epic2, "Epics should be equal if IDs are the same");
     }
+
     @Test
     public void testEpicCannotAddItselfAsSubtask() {
         Epic epic = new Epic(1, "Epic Title", "Epic Description");
