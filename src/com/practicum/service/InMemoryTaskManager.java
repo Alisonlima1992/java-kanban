@@ -9,13 +9,13 @@ import java.util.HashMap;
 import java.util.ArrayList;
 
 public class InMemoryTaskManager implements TaskManager {
-    private final HashMap<Integer, Task> tasks = new HashMap<>();
-    private final HashMap<Integer, Epic> epics = new HashMap<>();
-    private final HashMap<Integer, Subtask> subtasks = new HashMap<>();
+    protected final HashMap<Integer, Task> tasks = new HashMap<>();
+    protected final HashMap<Integer, Epic> epics = new HashMap<>();
+    protected final HashMap<Integer, Subtask> subtasks = new HashMap<>();
 
     private final InMemoryHistoryManager historyManager = new InMemoryHistoryManager();
 
-    private int idCounter = 1;
+    protected int idCounter = 1;
 
     public Task createTask(String title, String description, Status status) {
         Task task = new Task(idCounter++, title, description, status);

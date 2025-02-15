@@ -14,6 +14,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     private final File file;
 
     public FileBackedTaskManager(File file) {
+        super();
         this.file = file;
     }
 
@@ -54,6 +55,16 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             sb.append(toString(subtask)).append("\n");
         }
 
+        sb.append("history\n");
+        for (Task task : getHistory()) {
+            sb.append(task.getId()).append(",");
+        }
+
+        if (sb.length() > 0) {
+            sb.setLength(sb.length() - 1);
+        }
+        sb.append("\n");
+
         try {
             Files.writeString(file.toPath(), sb.toString());
         } catch (IOException e) {
@@ -64,12 +75,32 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     private String toString(Task task) {
         if (task instanceof Subtask) {
             Subtask subtask = (Subtask) task;
-            return String.format("%d,SUBTASK,%s,%s,%s,%d",
-                    task.getId(), task.getTitle(), task.getStatus(), task.getDescription(), subtask.getEpicId());
+            return String.join(",",
+                    String.valueOf(task.getId()),
+                    "SUBTASK",
+                    task.getTitle(),
+                    task.getStatus().toString(),
+                    task.getDescription(),
+                    String.valueOf(subtask.getEpicId())
+            );
         } else if (task instanceof Epic) {
-            return String.format("%d,EPIC,%s,%s,%s,http://", task.getId(), task.getTitle(), task.getStatus(), task.getDescription());
+            return String.join(",",
+                    String.valueOf(task.getId()),
+                    "EPIC",
+                    task.getTitle(),
+                    task.getStatus().toString(),
+                    task.getDescription(),
+                    ""
+            );
         } else {
-            return String.format("%d,TASK,%s,%s,%s,http://", task.getId(), task.getTitle(), task.getStatus(), task.getDescription());
+            return String.join(",",
+                    String.valueOf(task.getId()),
+                    "TASK",
+                    task.getTitle(),
+                    task.getStatus().toString(),
+                    task.getDescription(),
+                    ""
+            );
         }
     }
 
@@ -78,22 +109,46 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             List<String> lines = Files.readAllLines(file.toPath());
 
             FileBackedTaskManager taskManager = new FileBackedTaskManager(file);
+
             for (String line : lines.subList(1, lines.size())) {
+                if (line.equals("history")) break;
                 Task task = fromString(line);
+
                 if (task instanceof Epic) {
-                    taskManager.createEpic(task.getTitle(), task.getDescription());
+                    Epic epic = new Epic(taskManager.getNextId(), task.getTitle(), task.getDescription());
+                    taskManager.epics.put(epic.getId(), epic);
+                    taskManager.idCounter = Math.max(taskManager.idCounter, epic.getId() + 1);
                 } else if (task instanceof Subtask) {
-                    Subtask subtask = (Subtask) task;
-                    taskManager.createSubtask(subtask.getTitle(), subtask.getDescription(), subtask.getStatus(), subtask.getEpicId());
+                    Subtask subtask = new Subtask(taskManager.getNextId(), task.getTitle(), task.getDescription(), task.getStatus(), ((Subtask) task).getEpicId());
+                    taskManager.subtasks.put(subtask.getId(), subtask);
+                    taskManager.idCounter = Math.max(taskManager.idCounter, subtask.getId() + 1);
                 } else {
-                    taskManager.createTask(task.getTitle(), task.getDescription(), task.getStatus());
+                    Task newTask = new Task(taskManager.getNextId(), task.getTitle(), task.getDescription(), task.getStatus());
+                    taskManager.tasks.put(newTask.getId(), newTask);
+                    taskManager.idCounter = Math.max(taskManager.idCounter, newTask.getId() + 1);
                 }
             }
+
+            int historyIndex = lines.indexOf("history");
+            if (historyIndex >= 0 && historyIndex + 1 < lines.size()) {
+                String historyLine = lines.get(historyIndex + 1);
+                String[] historyIds = historyLine.split(",");
+                for (String id : historyIds) {
+                    if (!id.isEmpty()) {
+                        taskManager.getHistory().add(taskManager.getTaskById(Integer.parseInt(id.trim())));
+                    }
+                }
+            }
+
             return taskManager;
 
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка при загрузке менеджера из файла", e);
         }
+    }
+
+    private int getNextId() {
+        return idCounter++;
     }
 
     private static Task fromString(String value) {
