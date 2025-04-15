@@ -19,6 +19,10 @@ public interface TaskManager {
 
     ArrayList<Epic> getAllEpics();
 
+    ArrayList<Task> getPrioritizedTasks();
+
+    ArrayList<Subtask> getSubtasksForEpic(int epicId);
+
     ArrayList<Task> getHistory();
 
     Task getTaskById(int id);
@@ -28,6 +32,8 @@ public interface TaskManager {
     Subtask getSubtaskById(int id);
 
     void updateTask(Task task);
+
+    void updateEpicStatus(Epic epic);
 
     void deleteTask(int id);
 
@@ -43,6 +49,10 @@ public interface TaskManager {
 
     void deleteAll();
 
-    ArrayList<Task> getPrioritizedTasks();
+    void saveToFile(String filePath);
+
+    void loadFromFile(String filePath);
+
+    boolean hasConflicts(Task newTask);
 }
 
