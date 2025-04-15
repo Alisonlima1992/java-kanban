@@ -52,7 +52,5 @@ public interface TaskManager {
     void saveToFile(String filePath);
 
     void loadFromFile(String filePath);
-
-    boolean hasConflicts(Task newTask);
 }
 
