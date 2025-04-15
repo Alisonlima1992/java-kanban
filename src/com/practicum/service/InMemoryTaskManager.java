@@ -20,14 +20,15 @@ public class InMemoryTaskManager implements TaskManager {
     private final TreeSet<Task> prioritizedTasks = new TreeSet<>((task1, task2) -> {
         if (task1.getStartTime() == null && task2.getStartTime() != null) return 1;
         if (task1.getStartTime() != null && task2.getStartTime() == null) return -1;
-        if (task1.getStartTime() == null && task2.getStartTime() == null) return Integer.compare(task1.getId(), task2.getId());
+        if (task1.getStartTime() == null && task2.getStartTime() == null)
+            return Integer.compare(task1.getId(), task2.getId());
         return task1.getStartTime().compareTo(task2.getStartTime());
     });
 
     protected int idCounter = 1;
 
     @Override
-    public Task createTask(String title, String description, Status status,Duration duration, LocalDateTime startTime) {
+    public Task createTask(String title, String description, Status status, Duration duration, LocalDateTime startTime) {
         Task task = new Task(idCounter++, title, description, status);
         task.setDuration(duration);
         task.setStartTime(startTime);
@@ -35,6 +36,7 @@ public class InMemoryTaskManager implements TaskManager {
         prioritizedTasks.add(task);
         return task;
     }
+
     @Override
     public Subtask createSubtask(String title, String description, Status status, int epicId, Duration duration, LocalDateTime startTime) {
         Subtask subtask = new Subtask(idCounter++, title, description, status, epicId);
@@ -248,4 +250,3 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 }
-
