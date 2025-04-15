@@ -1,13 +1,18 @@
 package com.practicum.model;
 
 import com.practicum.service.Status;
-
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Objects;
 
 public class Task {
     private final int id;
     private final String title;
     private String description;
     private Status status;
+
+    private Duration duration;
+    private LocalDateTime startTime;
 
     public Task(int id, String title, String description, Status status) {
         this.id = id;
@@ -41,23 +46,50 @@ public class Task {
         this.description = description;
     }
 
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
+    public Duration getDuration() {
+        return duration;
+    }
 
-        if (obj == null || getClass() != obj.getClass()) return false;
+    public void setDuration(Duration duration) {
+        this.duration = duration;
+    }
 
-        Task task = (Task) obj;
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
 
-        return id == task.id;
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        if (startTime == null || duration == null) {
+            return null;
+        }
+        return startTime.plus(duration);
     }
 
     @Override
     public String toString() {
-        return "Task{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                ", status=" + status +
-                '}';
+        return String.format(
+                "Task{id=%d, title='%s', description='%s', status=%s, duration=%d minutes, startTime=%s}",
+                id, title, description, status, duration != null ? duration.toMinutes() : 0,
+                startTime != null ? startTime.toString() : "null"
+        );
     }
+
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Task)) return false;
+            Task task = (Task) o;
+            return id == task.id;
+    }
+
+    @Override
+    public int hashCode() {
+            return id;
+    }
+
 }

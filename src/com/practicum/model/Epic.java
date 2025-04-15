@@ -4,8 +4,13 @@ package com.practicum.model;
 import com.practicum.service.Status;
 import java.util.ArrayList;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 public class Epic extends Task {
     private final ArrayList<Subtask> subtasks;
+
+    private LocalDateTime endTime;
 
     public Epic(int id, String title, String description) {
         super(id, title, description, Status.NEW);
@@ -17,10 +22,63 @@ public class Epic extends Task {
     }
 
     public void addSubtask(Subtask subtask) {
-        if (subtask.getEpicId() != this.getId()) {
-            subtasks.add(subtask);
-            updateStatus();
+            if (subtask.getId() == this.getId()) {
+                return;
+            }
+
+            for (Subtask s : subtasks) {
+                if (s.getId() == subtask.getId()) {
+                    return;
+                }
+            }
+
+            if (subtask.getEpicId() == this.getId()) {
+                subtasks.add(subtask);
+                recalculateFields();
+                updateStatus();
+            }
         }
+
+
+    public void removeSubtask(Subtask subtask) {
+        this.subtasks.remove(subtask);
+        recalculateFields();
+    }
+
+    public void recalculateFields() {
+        if (subtasks.isEmpty()) {
+            setDuration(Duration.ZERO);
+            setStartTime(null);
+            this.endTime = null;
+            return;
+        }
+
+
+        Duration totalDuration = Duration.ZERO;
+        LocalDateTime earliestStart = null;
+        LocalDateTime latestEnd = null;
+
+        for (Subtask subtask : subtasks) {
+            totalDuration = totalDuration.plus(subtask.getDuration());
+
+            if (subtask.getStartTime() != null) {
+                if (earliestStart == null || subtask.getStartTime().isBefore(earliestStart)) {
+                    earliestStart = subtask.getStartTime();
+                }
+                if (latestEnd == null || subtask.getEndTime().isAfter(latestEnd)) {
+                    latestEnd = subtask.getEndTime();
+                }
+            }
+        }
+
+        setDuration(totalDuration);
+        setStartTime(earliestStart);
+        this.endTime = latestEnd;
+    }
+
+    @Override
+    public LocalDateTime getEndTime() {
+        return this.endTime;
     }
 
     public void updateStatus() {
@@ -38,6 +96,7 @@ public class Epic extends Task {
                 allDone = false;
             }
         }
+
         if (allDone) {
             setStatus(Status.DONE);
         } else if (anyInProgress) {
@@ -46,4 +105,21 @@ public class Epic extends Task {
             setStatus(Status.NEW);
         }
     }
+
+    @Override
+    public String toString() {
+        return String.format("Epic{id=%d, title='%s', description='%s', status=%s, duration=%d minutes, startTime=%s, endTime=%s}",
+                getId(), getTitle(), getDescription(), getStatus(),
+                getDuration() != null ? getDuration().toMinutes() : 0,
+                getStartTime() != null ? getStartTime().toString() : "null",
+                getEndTime() != null ? getEndTime().toString() : "null");
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Epic)) return false;
+        return super.equals(o);
+    }
+
 }
