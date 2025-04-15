@@ -3,7 +3,6 @@ package com.practicum.model;
 import com.practicum.service.Status;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 public class Task {
     private final int id;
