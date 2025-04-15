@@ -1,7 +1,6 @@
 package com.practicum.model;
 
 import com.practicum.service.Status;
-import java.time.Duration;
 import java.util.Objects;
 
 public class Subtask extends Task {
