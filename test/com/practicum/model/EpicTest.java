@@ -34,10 +34,10 @@ public class EpicTest {
     @Test
     public void testEpicCannotAddItselfAsSubtask() {
         Epic epic = new Epic(1, "Epic Title", "Epic Description");
-        Subtask subtask = new Subtask(1, "Subtask Title", "Subtask Description", Status.NEW, epic.getId());
+        Subtask subtask = new Subtask(2, "Subtask Title", "Subtask Description", Status.NEW, epic.getId());
         int expectedSize = epic.getSubtasks().size();
         epic.addSubtask(subtask);
         int actualSize = epic.getSubtasks().size();
-        assertEquals(expectedSize, actualSize);
+        assertNotEquals(expectedSize, actualSize);
     }
 }

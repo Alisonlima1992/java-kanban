@@ -56,8 +56,8 @@ public class InMemoryHistoryManagerTest {
 
         ArrayList<Task> history = historyManager.getHistory();
         assertEquals(2, history.size());
-        assertEquals(task2, history.get(1)); // Последний добавленный
-        assertEquals(task1, history.get(0)); // Предыдущий
+        assertEquals(task2, history.get(1));
+        assertEquals(task1, history.get(0));
     }
 
     @Test

@@ -22,7 +22,7 @@ public class Epic extends Task {
     }
 
     public void addSubtask(Subtask subtask) {
-            if (subtask.getId() == this.getId()) {
+            if (subtask.getEpicId() != this.getId()) {
                 return;
             }
 
@@ -59,8 +59,10 @@ public class Epic extends Task {
         LocalDateTime latestEnd = null;
 
         for (Subtask subtask : subtasks) {
-            totalDuration = totalDuration.plus(subtask.getDuration());
 
+            if (subtask.getDuration() != null) {
+                totalDuration = totalDuration.plus(subtask.getDuration());
+            }
             if (subtask.getStartTime() != null) {
                 if (earliestStart == null || subtask.getStartTime().isBefore(earliestStart)) {
                     earliestStart = subtask.getStartTime();

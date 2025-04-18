@@ -32,6 +32,11 @@ public class InMemoryTaskManager implements TaskManager {
         Task task = new Task(idCounter++, title, description, status);
         task.setDuration(duration);
         task.setStartTime(startTime);
+
+        if (startTime == null && hasConflicts(task)) {
+            throw new IllegalArgumentException("Task conflicts with an existing task.");
+        }
+
         tasks.put(task.getId(), task);
         prioritizedTasks.add(task);
         return task;
@@ -42,8 +47,12 @@ public class InMemoryTaskManager implements TaskManager {
         Subtask subtask = new Subtask(idCounter++, title, description, status, epicId);
         subtask.setDuration(duration);
         subtask.setStartTime(startTime);
-        subtasks.put(subtask.getId(), subtask);
 
+        if (startTime == null && hasConflicts(subtask)) {
+            throw new IllegalArgumentException("Subtask conflicts with an existing task.");
+        }
+
+        subtasks.put(subtask.getId(), subtask);
         Epic epic = epics.get(epicId);
         if (epic != null) {
             epic.addSubtask(subtask);
