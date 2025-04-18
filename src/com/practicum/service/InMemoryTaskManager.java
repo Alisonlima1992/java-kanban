@@ -1,12 +1,14 @@
 package com.practicum.service;
 
 
-import com.practicum.model.Task;
-import com.practicum.model.Epic;
-import com.practicum.model.Subtask;
 
-import java.util.HashMap;
+import com.practicum.model.*;
+import java.io.*;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.TreeSet;
 
 public class InMemoryTaskManager implements TaskManager {
     protected final HashMap<Integer, Task> tasks = new HashMap<>();
@@ -15,23 +17,47 @@ public class InMemoryTaskManager implements TaskManager {
 
     private final InMemoryHistoryManager historyManager = new InMemoryHistoryManager();
 
+    private final TreeSet<Task> prioritizedTasks = new TreeSet<>((task1, task2) -> {
+        if (task1.getStartTime() == null && task2.getStartTime() != null) return 1;
+        if (task1.getStartTime() != null && task2.getStartTime() == null) return -1;
+        if (task1.getStartTime() == null && task2.getStartTime() == null)
+            return Integer.compare(task1.getId(), task2.getId());
+        return task1.getStartTime().compareTo(task2.getStartTime());
+    });
+
     protected int idCounter = 1;
 
-    public Task createTask(String title, String description, Status status) {
+    @Override
+    public Task createTask(String title, String description, Status status, Duration duration, LocalDateTime startTime) {
         Task task = new Task(idCounter++, title, description, status);
+        task.setDuration(duration);
+        task.setStartTime(startTime);
+
+        if (startTime == null && hasConflicts(task)) {
+            throw new IllegalArgumentException("Task conflicts with an existing task.");
+        }
+
         tasks.put(task.getId(), task);
+        prioritizedTasks.add(task);
         return task;
     }
 
-    public Subtask createSubtask(String title, String description, Status status, int epicId) {
+    @Override
+    public Subtask createSubtask(String title, String description, Status status, int epicId, Duration duration, LocalDateTime startTime) {
         Subtask subtask = new Subtask(idCounter++, title, description, status, epicId);
+        subtask.setDuration(duration);
+        subtask.setStartTime(startTime);
+
+        if (startTime == null && hasConflicts(subtask)) {
+            throw new IllegalArgumentException("Subtask conflicts with an existing task.");
+        }
+
         subtasks.put(subtask.getId(), subtask);
-
         Epic epic = epics.get(epicId);
-
         if (epic != null) {
             epic.addSubtask(subtask);
             updateEpicStatus(epic);
+            prioritizedTasks.add(subtask);
         }
         return subtask;
     }
@@ -39,6 +65,7 @@ public class InMemoryTaskManager implements TaskManager {
     public Epic createEpic(String title, String description) {
         Epic epic = new Epic(idCounter++, title, description);
         epics.put(epic.getId(), epic);
+        prioritizedTasks.add(epic);
         return epic;
     }
 
@@ -78,6 +105,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     public void updateTask(Task task) {
+        prioritizedTasks.remove(task);
 
         if (task instanceof Epic) {
             epics.put(task.getId(), (Epic) task);
@@ -86,11 +114,14 @@ public class InMemoryTaskManager implements TaskManager {
             subtasks.put(subtask.getId(), subtask);
             Epic epic = epics.get(subtask.getEpicId());
             if (epic != null) {
-                updateEpicStatus(epic);
+                epic.recalculateFields();
+                epic.updateStatus();
             }
         } else {
             tasks.put(task.getId(), task);
         }
+
+        prioritizedTasks.add(task);
     }
 
     public void deleteTask(int id) {
@@ -98,6 +129,7 @@ public class InMemoryTaskManager implements TaskManager {
         Task task = tasks.remove(id);
         if (task != null) {
             historyManager.remove(id);
+            prioritizedTasks.remove(task);
         }
 
     }
@@ -128,6 +160,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     public void deleteAllTasks() {
         tasks.clear();
+        prioritizedTasks.clear();
     }
 
     public void deleteAllSubtasks() {
@@ -145,6 +178,7 @@ public class InMemoryTaskManager implements TaskManager {
         tasks.clear();
         subtasks.clear();
         epics.clear();
+        prioritizedTasks.clear();
     }
 
     public ArrayList<Subtask> getSubtasksForEpic(int epicId) {
@@ -153,11 +187,75 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     private void updateEpicStatus(Epic epic) {
-        epic.updateStatus();
+        epic.recalculateFields();
     }
 
 
     public ArrayList<Task> getHistory() {
         return historyManager.getHistory();
+    }
+
+    @Override
+    public ArrayList<Task> getPrioritizedTasks() {
+        return new ArrayList<>(prioritizedTasks);
+    }
+
+    private boolean hasConflicts(Task newTask) {
+        return prioritizedTasks.stream().anyMatch(existing -> isOverlapping(existing, newTask));
+    }
+
+    private boolean isOverlapping(Task existingTask, Task newTask) {
+        LocalDateTime existingStart = existingTask.getStartTime();
+        LocalDateTime existingEnd = existingTask.getEndTime();
+        LocalDateTime newStart = newTask.getStartTime();
+        LocalDateTime newEnd = newTask.getEndTime();
+
+        if (existingStart == null || existingEnd == null || newStart == null || newEnd == null) {
+            return false;
+        }
+
+        return !(newEnd.isBefore(existingStart) || newStart.isAfter(existingEnd));
+    }
+
+    public void saveToFile(String filePath) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            for (Task task : tasks.values()) {
+                writer.write(String.format("%d,%s,%s,%s,%d,%s",
+                        task.getId(),
+                        task.getTitle(),
+                        task.getDescription(),
+                        task.getStatus(),
+                        task.getDuration() != null ? task.getDuration().toMinutes() : 0,
+                        task.getStartTime() != null ? task.getStartTime().toString() : "null"
+                ));
+                writer.newLine();
+            }
+
+        } catch (IOException e) {
+            throw new ManagerSaveException("Ошибка записи в файл", e);
+        }
+    }
+
+    public void loadFromFile(String filePath) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] fields = line.split(",");
+                int id = Integer.parseInt(fields[0]);
+                String title = fields[1];
+                String description = fields[2];
+                Status status = Status.valueOf(fields[3]);
+                Duration duration = Duration.ofMinutes(Long.parseLong(fields[4]));
+                LocalDateTime startTime = fields[5].equals("null") ? null : LocalDateTime.parse(fields[5]);
+
+                Task task = new Task(id, title, description, status);
+                task.setDuration(duration);
+                task.setStartTime(startTime);
+                tasks.put(task.getId(), task);
+                prioritizedTasks.add(task);
+            }
+        } catch (IOException e) {
+            throw new ManagerSaveException("Ошибка чтения из файла", e);
+        }
     }
 }

@@ -32,7 +32,12 @@ public class InMemoryHistoryManager implements HistoryManager {
             newNode.prev = tail;
             tail = newNode;
         }
+
         historyMap.put(task.getId(), newNode);
+
+        if (historyMap.size() > 10) {
+            remove(head.task.getId());
+        }
     }
 
     public void remove(int id) {
@@ -70,5 +75,8 @@ public class InMemoryHistoryManager implements HistoryManager {
 
         return tasks;
     }
+
+
 }
+
 

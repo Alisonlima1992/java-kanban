@@ -1,6 +1,7 @@
 package com.practicum.model;
 
 import com.practicum.service.Status;
+import java.util.Objects;
 
 
 public class Subtask extends Task {
@@ -22,5 +23,25 @@ public class Subtask extends Task {
 
     public int getEpicId() {
         return epicId;
+    }
+
+
+    @Override
+    public String toString() {
+        return String.format("Subtask{id=%d, title='%s', description='%s', status=%s, epicId=%d, duration=%d minutes, startTime=%s}",
+                getId(), getTitle(), getDescription(), getStatus(), epicId,
+                getDuration() != null ? getDuration().toMinutes() : 0,
+                getStartTime() != null ? getStartTime().toString() : "null");
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!super.equals(o)) return false;
+        Subtask subtask = (Subtask) o;
+        return true;
+    }
+
+    public int hashCode() {
+        return Objects.hash(super.hashCode());
     }
 }

@@ -3,6 +3,8 @@ package test.com.practicum.service;
 import com.practicum.model.Task;
 import com.practicum.service.*;
 import org.junit.Test;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -29,7 +31,11 @@ public class ManagersTest {
         TaskManager taskManager = Managers.getDefault();
         assertNotNull(taskManager);
 
-        Task task = taskManager.createTask("Test Task", "Test Description", Status.NEW);
+        // Параметры для создания задачи
+        Duration duration = Duration.ofHours(1);
+        LocalDateTime startTime = LocalDateTime.now();
+
+        Task task = taskManager.createTask("Test Task", "Test Description", Status.NEW, duration, startTime);
         assertNotNull(task);
 
         Task retrievedTask = taskManager.getTaskById(task.getId());
